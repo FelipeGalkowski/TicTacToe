@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <input type="text" id="nomep1" placeholder="Nome do Jogador 1">
+        <input type="text" id="nomep2" placeholder="Nome do Jogador 2">
+        <input type="submit" id="jogar" value="JOGAR" onclick="iniciarJogo()">
+
+        <div class="game-area">
+            <h1>TIC TAC TOE!</h1>
+            <div class="scoreboard">
+                <div class="player">
+                    <h2 id="CampoNomeP1"></h2>
+                    <p>Pontos: <span id="player1Score"></span></p>
+                </div>
+                <div class="player">
+                    <h2 id="CampoNomeP2"></h2>
+                    <p>Pontos: <span id="player2Score"></span></p>
+                </div>
+            </div>
+            <div class="board">
+                <div class="cell" id="1" onclick="jogada(this.id)"></div>
+                <div class="cell" id="2" onclick="jogada(this.id)"></div>
+                <div class="cell" id="3" onclick="jogada(this.id)"></div>
+                <div class="cell" id="4" onclick="jogada(this.id)"></div>
+                <div class="cell" id="5" onclick="jogada(this.id)"></div>
+                <div class="cell" id="6" onclick="jogada(this.id)"></div>
+                <div class="cell" id="7" onclick="jogada(this.id)"></div>
+                <div class="cell" id="8" onclick="jogada(this.id)"></div>
+                <div class="cell" id="9" onclick="jogada(this.id)"></div>
+            </div>
+        </div>
+
+        <div id="msg">&nbsp;</div>
+
+        <div id="botoes">
+            <button onclick="jogarNovamente()">Jogar novamente</button>
+            <button onclick="reset()">RESET</button>
+        </div>
+
+    </div>
+
+    <script>
+        let msgg = document.getElementById('msg');
+        let campoScore1 = document.getElementById('player1Score');
+        let campoScore2 = document.getElementById('player2Score');
+        let scorep1 = 0;
+        let scorep2 = 0;
+        let verifica = 0;
+        let tabuleiro = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let rodando = true;
+        let combinacaoWin = [
+            [1, 2, 3], [1, 4, 7], [1, 5, 9], 
+            [9, 8, 7], [9, 6, 3], [2, 5, 8], 
+            [4, 5, 6], [7, 5, 3]
+        ];
+
+        // Função para carregar o jogo se houver dados salvos
+        function carregarJogo() {
+            const dadosSalvos = localStorage.getItem("dados");
+            if (dadosSalvos) {
+                const gameData = JSON.parse(dadosSalvos);
+                scorep1 = gameData.pontoJogador1;
+                scorep2 = gameData.pontoJogador2;
+                tabuleiro = gameData.dadosTabuleiro;
+                rodando = gameData.rodando; // Verifica se o jogo estava em andamento
+                document.getElementById('CampoNomeP1').innerText = gameData.dadosNomep1;
+                document.getElementById('CampoNomeP2').innerText = gameData.dadosNomep2;
+                campoScore1.innerText = scorep1;
+                campoScore2.innerText = scorep2;
+                mostrarJogo();
+                restaurarTabuleiro();  // Restaura o estado do tabuleiro
+            }
+        }
+
+        // Função de reset
+        function reset() {
+            localStorage.removeItem("dados");
+            window.location.reload();
+        }
+
+        // Função para iniciar o jogo
+        function iniciarJogo() {
+            const nome1 = document.getElementById("nomep1").value;
+            const nome2 = document.getElementById("nomep2").value;
+
+            if (nome1 && nome2) {
+                document.getElementById('CampoNomeP1').innerText = nome1;
+                document.getElementById('CampoNomeP2').innerText = nome2;
+                mostrarJogo();
+            } else {
+                alert("Por favor, insira os nomes dos dois jogadores.");
+            }
+        }
+
+        function mostrarJogo() {
+            document.querySelector(".game-area").style.display = "block";
+            document.getElementById("botoes").style.display = "block";
+            document.getElementById("nomep1").style.display = "none";
+            document.getElementById("nomep2").style.display = "none";
+            document.querySelector("input[type='submit']").style.display = "none";
+        }
+
+        function jogarNovamente() {
+            verifica = 0;
+            tabuleiro = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let cells = document.getElementsByClassName('cell');
+            for (let i = 0; i < cells.length; i++) {
+                cells[i].style.background = "#ddd";
+                msgg.innerHTML = '&nbsp;';
+                rodando = true;
+            }
+        }
+
+        // Função para restaurar o estado visual do tabuleiro
+        function restaurarTabuleiro() {
+            let cells = document.getElementsByClassName('cell');
+            for (let i = 1; i < tabuleiro.length; i++) {
+                if (tabuleiro[i] === 1) {
+                    cells[i - 1].style.background = "green";
+                } else if (tabuleiro[i] === 2) {
+                    cells[i - 1].style.background = "red";
+                }
+            }
+        }
+
+        function jogada(id) {
+            const campo = document.getElementById(id);
+            const nomeJogador1 = document.getElementById('CampoNomeP1').innerText;
+            const nomeJogador2 = document.getElementById('CampoNomeP2').innerText;
+
+            if (rodando === true) {
+                if (tabuleiro[id] >= 1) {
+                    msgg.innerText = "Campo já foi jogado!";
+                } else if (verifica % 2 === 0) {
+                    campo.style.background = "red";
+                    tabuleiro[id] = 2;
+                    verifica++;
+                    msgg.innerHTML = '&nbsp;';
+                } else {
+                    campo.style.background = "green";
+                    tabuleiro[id] = 1;
+                    verifica++;
+                    msgg.innerHTML = '&nbsp;';
+                }
+
+                // Verifica se há um vencedor
+                for (let combinacao of combinacaoWin) {
+                    const [a, b, c] = combinacao;
+
+                    if (tabuleiro[a] && (tabuleiro[a] === tabuleiro[b]) && (tabuleiro[a] === tabuleiro[c])) {
+                        if (verifica % 2 === 0) {
+                            msgg.innerText = `${nomeJogador1} Ganhou! Clique em jogar novamente ou resete o jogo.`;
+                            scorep1++;
+                            campoScore1.innerText = scorep1;
+                        } else {
+                            msgg.innerText = `${nomeJogador2} Ganhou! Clique em jogar novamente ou resete o jogo.`;
+                            scorep2++;
+                            campoScore2.innerText = scorep2;
+                        }
+                        rodando = false;
+                    }
+                }
+
+                // Verifica empate
+                if (verifica === 9 && rodando) {
+                    msgg.innerText = `Empate! Cada jogador ganhou 1 ponto.`;
+                    scorep1++;
+                    scorep2++;
+                    campoScore1.innerText = scorep1;
+                    campoScore2.innerText = scorep2;
+                    rodando = false;
+                }
+
+                // Salva os dados no localStorage
+                const gameData = {
+                    pontoJogador1: scorep1,
+                    pontoJogador2: scorep2,
+                    dadosTabuleiro: tabuleiro,
+                    dadosNomep1: nomeJogador1,
+                    dadosNomep2: nomeJogador2,
+                    rodando: rodando // Salva o estado do jogo (se está ativo ou não)
+                };
+                localStorage.setItem("dados", JSON.stringify(gameData));
+            }
+        }
+
+        // Carrega o jogo ao iniciar a página
+        window.onload = carregarJogo;
+    </script>
+</body>
+
+</html>
